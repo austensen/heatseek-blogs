@@ -12,6 +12,8 @@ library(darksky) # DarkSky API for weather data
 
 # Loads theme_heatseek() and vector heatseek_colors
 source(here("R", "theme_heatseek.R"))
+
+# Loads function to download heat violations from NYC OpenData for a given heat season
 source(here("R", "get_311_heat_complaints.R"))
 
 # This directory is gitignored
@@ -69,6 +71,8 @@ temps_daily <- temps_raw %>%
 # ggplot2 only allows a secondary axis that is a 1:1 transformation of the
 # primary axis. So the following uses some hacks borrowed from
 # https://rpubs.com/MarkusLoew/226759
+
+# Date with lowest temperature and most complaints in 2017-2018 season was 2018-01-06
 
 x_date_breaks <- c(seq(start_season, end_season, by = "1 month"), end_season)
 
