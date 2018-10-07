@@ -27,9 +27,9 @@ end_season <- as.Date(str_glue("{end_yr}-05-31"))
 
 # Get daily heat complaints for given heat season
 
-compalints_file <- here("data", str_glue("311-complaints_heat_{start_yr}-{end_yr}.feather"))
+complaints_file <- here("data", str_glue("311-complaints_heat_{start_yr}-{end_yr}.feather"))
 
-if (file_exists(compalints_file)) {
+if (file_exists(complaints_file)) {
   complaints_raw <- read_feather(complaints_file)
 } else {
   complaints_raw <- get_311_heat_complaints(2017, here("data"))
