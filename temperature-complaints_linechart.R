@@ -86,7 +86,7 @@ ggplot() +
             aes(x = date, y = complaints_highest/100, label = scales::comma(complaints_highest)),
             na.rm = TRUE,
             color = heatseek_colors["orange"],
-            size = 2,
+            size = 2.5,
             fontface = "bold",
             nudge_y = 2.5) + 
   # Temperature
@@ -102,7 +102,7 @@ ggplot() +
             aes(x = date, y = temp_lowest, label = round(temp_lowest, 1)),
             na.rm = TRUE,
             color = heatseek_colors["blue"],
-            size = 2,
+            size = 2.5,
             fontface = "bold",
             nudge_y = -2.5) + 
   # Scales, themes, and titles

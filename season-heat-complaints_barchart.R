@@ -38,7 +38,7 @@ season_complaints %>%
   ggplot() +
   aes(x = season, y = heat_complaints,label = complaint_label) +
   geom_col(width = 0.7, fill = heatseek_colors["orange"]) +
-  geom_text(nudge_y = 8000, na.rm = TRUE, size = 3.5) +
+  geom_text(nudge_y = 8000, na.rm = TRUE, size = 3, fontface = "bold", color = heatseek_colors["orange"]) +
   scale_y_continuous(breaks = seq(0, 200000, 50000), labels = scales::comma) +
   theme_heatseek() +
   theme(panel.grid.major.x = ggplot2::element_blank()) +
