@@ -7,3 +7,8 @@ Data work for HeatSeek blog updates
 ![](img/season-heat-complaints_barchart.png)
 
 ---
+
+#### [`temperature-complaints_linechart.R`](temperature-complaints_linechart.R)
+![](img/temperate-complaints_2017-2018_linechart.png)
+
+---
