@@ -41,6 +41,7 @@ season_complaints %>%
   geom_text(nudge_y = 8000, na.rm = TRUE, size = 3.5) +
   scale_y_continuous(breaks = seq(0, 200000, 50000), labels = scales::comma) +
   theme_heatseek() +
+  theme(panel.grid.major.x = ggplot2::element_blank()) +
   labs(
     title = "Heat Complaints Year-Over-Year",
     subtitle = "October 1 - May 31",
