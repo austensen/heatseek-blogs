@@ -12,3 +12,8 @@ Data work for HeatSeek blog updates
 ![](img/temperate-complaints_2017-2018_linechart.png)
 
 ---
+
+#### [`heat-complaints-buildings_map.R`](heat-complaints-buildings_map.R)
+![](img/heat-complaints-buildings_map.png)
+
+---
