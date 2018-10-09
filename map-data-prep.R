@@ -94,7 +94,6 @@ all_bbls <- pluto_bbls %>%
   left_join(violation_bbls, by = "bbl") %>% 
   left_join(complaint_bbls, by = "bbl") %>% 
   replace_na(list(viol = 0, comp = 0)) %>% 
-  filter_at(vars(viol, comp), any_vars(. > 0)) %>% 
   mutate_at(vars(viol, comp), funs("rt" = . / unitsres))
 
 
@@ -104,7 +103,8 @@ all_bbls <- pluto_bbls %>%
 
 # BBL
 all_bbls %>% 
-  filter(!is.na(lng), !is.na(lat)) %>% 
+  filter_at(vars(lng, lat), any_vars(!is.na(.))) %>% 
+  filter_at(vars(viol, comp), any_vars(. > 0)) %>% 
   st_as_sf(coords = c("lng", "lat"), crs = 4326) %>% 
   select(bbl, unitsres, comp, comp_rt, viol, viol_rt) %>% 
   write_sf(here("data", "bbl-complaints-violations_2017-2018.geojson"), delete_dsn = TRUE)
@@ -114,7 +114,7 @@ all_bbls %>%
   group_by(boro) %>% 
   summarise_at(vars(viol, comp, unitsres), sum) %>% 
   mutate_at(vars(viol, comp), funs("rt" = . / unitsres)) %>% 
-  inner_join(boro_shapes, by = "boro") %>% 
+  right_join(boro_shapes, by = "boro") %>% 
   st_as_sf() %>% 
   write_sf(here("data", "boro-complaints-violations_2017-2018.geojson"), delete_dsn = TRUE)
 
@@ -123,7 +123,8 @@ all_bbls %>%
   group_by(cd) %>% 
   summarise_at(vars(viol, comp, unitsres), sum) %>% 
   mutate_at(vars(viol, comp), funs("rt" = . / unitsres)) %>% 
-  inner_join(cd_shapes, by = "cd") %>% 
+  right_join(cd_shapes, by = "cd") %>% 
+  replace_na(list(viol = 0, comp = 0, viol_rt = 0, comp_rt = 0, unitsres = 0)) %>% 
   st_as_sf() %>% 
   write_sf(here("data", "cd-complaints-violations_2017-2018.geojson"), delete_dsn = TRUE)
 
@@ -132,7 +133,8 @@ all_bbls %>%
   group_by(tract2010) %>% 
   summarise_at(vars(viol, comp, unitsres), sum) %>% 
   mutate_at(vars(viol, comp), funs("rt" = . / unitsres)) %>% 
-  inner_join(tract_shapes, by = "tract2010") %>% 
+  right_join(tract_shapes, by = "tract2010") %>% 
+  replace_na(list(viol = 0, comp = 0, viol_rt = 0, comp_rt = 0, unitsres = 0)) %>% 
   st_as_sf() %>% 
   write_sf(here("data", "tract-complaints-violations_2017-2018.geojson"), delete_dsn = TRUE)
 
@@ -141,6 +143,7 @@ all_bbls %>%
   group_by(zipcode) %>% 
   summarise_at(vars(viol, comp, unitsres), sum) %>% 
   mutate_at(vars(viol, comp), funs("rt" = . / unitsres)) %>% 
-  inner_join(zip_shapes, by = "zipcode") %>% 
+  right_join(zip_shapes, by = "zipcode") %>% 
+  replace_na(list(viol = 0, comp = 0, viol_rt = 0, comp_rt = 0, unitsres = 0)) %>% 
   st_as_sf() %>% 
   write_sf(here("data", "zip-complaints-violations_2017-2018.geojson"), delete_dsn = TRUE)
