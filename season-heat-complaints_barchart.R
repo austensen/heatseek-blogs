@@ -1,11 +1,19 @@
-library(dplyr) # dataframe manipulation
-library(stringr) # string manipulation
-library(ggplot2) # plotting
-library(readr) # read/write rectangular text data
+# Create bar graph of total heat complaints by heat-season 2010-2018
+
+
+# Setup -------------------------------------------------------------------
+
+library(tidyverse) # tibble, dplyr, tidyr, readr, purrr, stringr, ggplot2
 library(here) # consistent relative file paths
 
+# Loads theme_heatseek() and vector heatseek_colors for graphs
+source(here("R", "theme_heatseek.R"))
+
+
+# Get Heat Complaints Data ------------------------------------------------
+
 # Use Socrata SQL-like API to count heat complaints by year/month
-url_query_311 <- URLencode(stringr::str_glue(
+url_query_311 <- URLencode(str_glue(
   "https://data.cityofnewyork.us/resource/fhrw-4uyv.csv?$query=
    SELECT date_extract_y(created_date) AS year, date_extract_m(created_date) AS month, COUNT(*) AS heat_complaints 
    WHERE date_extract_m(created_date) IN (10, 11, 12, 1, 2, 3, 4, 5)
@@ -13,23 +21,23 @@ url_query_311 <- URLencode(stringr::str_glue(
    GROUP BY date_extract_y(created_date), date_extract_m(created_date)"
 ))
 
-monthly_complaints <- read_csv(url_query_311, col_types = "iii")
-
-# Assign months to "heat seasons", remove incomplete seasons, sum complaints by season
-season_complaints <- monthly_complaints %>% 
+# Download, clean, and aggregate complaints
+season_complaints <- url_query_311 %>% 
+  read_csv(col_types = "iii") %>% 
   mutate(
+    # Assign months to "heat seasons"
     season = case_when(
       month %in% 10:12 ~ str_c(year, "-", year + 1),
       month %in% 1:5 ~ str_c(year - 1, "-", year),
     )
   ) %>% 
-  filter(!season %in% c("2009-2010", "2018-2019")) %>%
+  filter(!season %in% c("2009-2010", "2018-2019")) %>% # remove incomplete seasons
   group_by(season) %>% 
   summarise(heat_complaints = sum(heat_complaints))
 
 
-# Loads theme_heatseek() and vector heatseek_colors
-source(here("R", "theme_heatseek.R"))
+
+# Create Bar Graph --------------------------------------------------------
 
 # Create column graph of total heat complaints by season
 season_complaints %>% 

@@ -1,29 +1,40 @@
 # Create map of buildings with heat complaints
 
+
+# Setup -------------------------------------------------------------------
+
 library(dplyr) # dataframe manipulation
-library(feather) # R/Python compatible dataframes
 library(here) # consistent relative file paths
 library(fs) # consistent file system operations
 library(mapdeck) # maps with mapbox/deck
 library(htmlwidgets) # export map to HTML file
 library(magick) # manipulate images
-library(getPass) # supply passwords securely via popup
 
 # Loads theme_heatseek() and vector heatseek_colors
 source(here("R", "theme_heatseek.R"))
 
-complaints_raw <- read_feather(here("data", "311-complaints_heat_2017-2018.feather"))
+# Download and/or import 311 heat complaints for a given heat season
+source(here("R", "get_311_heat_complaints.R"))
+
+# Load secret info from config file
+source(here("config.R"))
 
 # Create an account at MapBox.com and provide your API key below
-mapbox_key <- getPass::getPass("MapBox API Key")
+mapbox_key <- get_mapbox_key()
+
+
+# Get Heat Complaint Locations --------------------------------------------
 
 # Get building-level count of heat complaints
-complaints_bldgs <- complaints_raw %>% 
+complaints_bldgs <- get_311_heat_complaints(2017, here("data")) %>% 
   filter(
     !is.na(latitude) & !is.na(longitude)
   ) %>% 
   group_by(incident_address, latitude, longitude) %>% 
   summarise(complaints = n())
+
+
+# Create Map of Heat Complaints -------------------------------------------
 
 # Create map of residential buildings with heat complaints
 complaints_map <- mapdeck(
@@ -48,7 +59,7 @@ dir_create(here("img", "mapdeck"))
 htmlwidgets::saveWidget(complaints_map, here("img", "mapdeck", "complaints-map.html"))
 
 
-# STOP - Open HTML map in browser and export screenshot
+# STOP - Open HTML map in browser and export screenshot: "heat-complaints-buildings_map_nolabels.png"
 
 
 # After creating the screenshot, add title
