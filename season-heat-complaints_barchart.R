@@ -5,8 +5,11 @@
 
 library(tidyverse) # tibble, dplyr, tidyr, readr, purrr, stringr, ggplot2
 library(here) # consistent relative file paths
+library(magick) # image manipulation
 
-# Loads theme_heatseek() and vector heatseek_colors for graphs
+# Loads theme_heatseek(), vector heatseek_colors for graphs, heatseek_logo()
+# which returns a scaled {magick} image, and ggimage() which works like ggsave
+# but returns a {magick} image
 source(here("R", "theme_heatseek.R"))
 
 
@@ -40,13 +43,13 @@ season_complaints <- url_query_311 %>%
 # Create Bar Graph --------------------------------------------------------
 
 # Create column graph of total heat complaints by season
-season_complaints %>% 
+p <- season_complaints %>% 
   # Add label for most recent season only
   mutate(complaint_label = if_else(season == "2017-2018", scales::comma(heat_complaints), NA_character_)) %>% 
   ggplot() +
   aes(x = season, y = heat_complaints,label = complaint_label) +
   geom_col(width = 0.7, fill = heatseek_colors["orange"]) +
-  geom_text(nudge_y = 8000, na.rm = TRUE, size = 3, fontface = "bold", color = heatseek_colors["orange"]) +
+  geom_text(nudge_y = 8000, na.rm = TRUE, size = 3.5, fontface = "bold", color = heatseek_colors["orange"]) +
   scale_y_continuous(breaks = seq(0, 200000, 50000), labels = scales::comma) +
   theme_heatseek() +
   theme(panel.grid.major.x = ggplot2::element_blank()) +
@@ -58,5 +61,7 @@ season_complaints %>%
     caption = "Source: NYC 311 Complaints"
   )
 
-ggsave(here("img", "season-heat-complaints_barchart.png"), width = 8, height = 4, units = "in")
-  
+p %>% 
+  ggimage(width = 8, height = 4) %>% 
+  image_composite(heatseek_logo("400"), offset = "+1900+30") %>% 
+  image_write(here("img", "season-heat-complaints_barchart.png"))

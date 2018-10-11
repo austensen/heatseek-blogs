@@ -1,3 +1,5 @@
+![](img/logos/heatseek-logo.png | width=200)
+
 # heatseek-blogs
 Data work for HeatSeek blog updates 
 
@@ -27,7 +29,12 @@ Edit [`sample_config.R`](sample_config.R) to add you connection info for [nyc-db
 
 ---
 
-#### [`heat-complaints-buildings_map.R`](heat-complaints-buildings_map.R)
+#### [`boro-complaints-violations_barchart.R`](heat-complaints-buildings_map.R)
+![](img/boro-complaints-violations_barchart.png)
+
+---
+
+#### [`heat-complaints-stats.Rmd`](heat-complaints-stats.Rmd)
 ![](img/heat-complaints-buildings_map.png)
 
 ---

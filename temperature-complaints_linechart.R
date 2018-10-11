@@ -7,8 +7,11 @@ library(tidyverse) # tibble, dplyr, tidyr, readr, purrr, stringr, ggplot2
 library(here) # consistent relative file paths
 library(fs) # consistent file system operations
 library(darksky) # DarkSky API for weather data
+library(magick) # image manipulation
 
-# Loads theme_heatseek() and vector heatseek_colors
+# Loads theme_heatseek(), vector heatseek_colors for graphs, heatseek_logo()
+# which returns a scaled {magick} image, and ggimage() which works like ggsave
+# but returns a {magick} image
 source(here("R", "theme_heatseek.R"))
 
 # Download and/or import 311 heat complaints for a given heat season
@@ -46,7 +49,7 @@ complaints_daily <- get_311_heat_complaints(start_yr, here("data")) %>%
 temps_file <- here("data", str_glue("daily-temperatures_{start_yr}-{end_yr}.csv"))
                           
 if (file_exists(temps_file)) {
-  temps_raw <- read_csv(temps_file, col_types = cols_only(time = "D", temperatureLow = "d"))
+  temps_raw <- read_csv(temps_file, col_types = cols_only(time = "T", temperatureLow = "d"))
 } else {
   temps_raw <- seq(start_season, end_season, by = "1 day") %>%  
     map(~get_forecast_for(40.673646, -73.969787, .x)) %>% # using Grand Army Plaza in BK
@@ -75,7 +78,7 @@ temps_daily <- temps_raw %>%
 
 x_date_breaks <- c(seq(start_season, end_season, by = "1 month"), end_season)
 
-ggplot() +
+p <- ggplot() +
   # Complaints
   geom_line(data = complaints_daily, 
             aes(x = date, y = heat_complaints/100), 
@@ -113,8 +116,9 @@ ggplot() +
   scale_y_continuous(labels = scales::comma, 
                      sec.axis = sec_axis(~.*100, labels = scales::comma, name = "Heat Complaints")) + 
   theme_heatseek() +
-  theme(axis.title.y.left = element_text(colour = heatseek_colors["blue"]),
-        axis.title.y.right = element_text(colour = heatseek_colors["orange"])) +
+  theme(axis.title.y.left = element_text(colour = heatseek_colors["blue"], face = "bold"),
+        axis.title.y.right = element_text(colour = heatseek_colors["orange"], face = "bold"),
+        plot.subtitle = element_text(margin = margin(0, 0, 20, 0))) +
   labs(
     title = "Daily Heat Complaints and Temperature",
     subtitle = str_glue("October 1, {start_yr} - May 31, {end_yr}"),
@@ -123,5 +127,8 @@ ggplot() +
     caption = "Sources: DarkSky, NYC 311 Complaints"
   )
 
-image_file <- here("img", str_glue("temperate-complaints_{start_yr}-{end_yr}_linechart.png"))
-ggsave(image_file, width = 8, height = 4, units = "in")
+
+p %>% 
+  ggimage(width = 8, height = 4) %>% 
+  image_composite(heatseek_logo("450"), offset = "+1900+30") %>% 
+  image_write(here("img", str_glue("temperate-complaints_{start_yr}-{end_yr}_linechart.png")))
