@@ -20,7 +20,7 @@ theme_heatseek <- function(base_size = 11,
 }
 
 # Returns Heat Seek logo as a {magick} image
-heatseek_logo <- function(scale_geometry = 500) {
+heatseek_logo <- function(scale_geometry = 400) {
   img <- magick::image_read(here::here("img", "logos", "heatseek-logo.png"))
   img <- magick::image_scale(img, geometry = scale_geometry)
   img

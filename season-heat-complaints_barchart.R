@@ -63,5 +63,5 @@ p <- season_complaints %>%
 
 p %>% 
   ggimage(width = 8, height = 4) %>% 
-  image_composite(heatseek_logo("400"), offset = "+1900+30") %>% 
+  image_composite(heatseek_logo(), offset = "+1900+30") %>% 
   image_write(here("img", "season-heat-complaints_barchart.png"))

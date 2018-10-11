@@ -1,11 +1,12 @@
-![](img/logos/heatseek-logo.png | width=200)
+<img src="img/logos/heatseek-logo.png" width="200">
 
-# heatseek-blogs
-Data work for HeatSeek blog updates 
+Data work for blog updates on 2017-2018 heat season
 
 ---
 
 ### Getting Started
+
+<br>
 
 Install the following R packages
 
@@ -14,10 +15,13 @@ pkgs <- c("tidyverse", "here", "fs", "sf", "mapdeck", "htmlwidgets", "magick", "
 install.packages(pkgs)
 ```
 
-
 Edit [`sample_config.R`](sample_config.R) to add you connection info for [nyc-db](https://github.com/aepyornis/nyc-db), your [MapBox](https://www.mapbox.com/signup) API key, and your [DarkSky](https://darksky.net/dev/register) API key.
 
 ---
+
+### Results
+
+<br>
 
 #### [`season-heat-complaints_barchart.R`](season-heat-complaints_barchart.R)
 ![](img/season-heat-complaints_barchart.png)
@@ -29,7 +33,7 @@ Edit [`sample_config.R`](sample_config.R) to add you connection info for [nyc-db
 
 ---
 
-#### [`boro-complaints-violations_barchart.R`](heat-complaints-buildings_map.R)
+#### [`boro-complaints-violations_barchart.R`](boro-complaints-violations_barchart.R)
 ![](img/boro-complaints-violations_barchart.png)
 
 ---

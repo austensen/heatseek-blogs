@@ -130,5 +130,5 @@ p <- ggplot() +
 
 p %>% 
   ggimage(width = 8, height = 4) %>% 
-  image_composite(heatseek_logo("450"), offset = "+1900+30") %>% 
+  image_composite(heatseek_logo(), offset = "+1900+30") %>% 
   image_write(here("img", str_glue("temperate-complaints_{start_yr}-{end_yr}_linechart.png")))
