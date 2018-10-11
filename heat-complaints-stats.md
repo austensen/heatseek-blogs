@@ -7,6 +7,7 @@ Maxwell Austensen
 library(tidyverse) # tibble, dplyr, tidyr, readr, purrr, stringr, ggplot2
 library(here) # consistent relative file paths
 library(DBI) # database connection
+library(magick) # image manipulation
 ```
 
 Download and/or import 311 heat complaints for the 2017-2018 heat
@@ -108,7 +109,9 @@ BBLs with heat complaints but no heat violations issued this season:
 -----
 
 ``` r
-# Loads theme_heatseek() and vector heatseek_colors for graphs
+# Loads ggplot2 theme theme_heatseek(), vector heatseek_colors for graphs, heatseek_logo()
+# which returns a scaled {magick} image, and ggimage() which works like ggsave
+# but returns a {magick} image
 source(here("R", "theme_heatseek.R"))
 
 boro_to_borough <- function(x) {
@@ -119,25 +122,30 @@ p <- complaints_clean %>%
   filter(viol_issued_filled) %>% 
   mutate(borough = boro_to_borough(str_sub(bbl, 1, 1))) %>% 
   count(borough) %>% 
+  mutate(borough = fct_reorder(borough, n, .desc = TRUE)) %>% 
   ggplot() +
   aes(x = borough, y = n, label = scales::comma(n)) +
-  geom_col(fill = heatseek_colors[["orange"]]) +
-  scale_y_continuous(labels = scales::comma) +
-  geom_text(nudge_y = 200, na.rm = TRUE, size = 3, fontface = "bold", color = heatseek_colors["orange"]) +
+  geom_col(width = 0.7, fill = heatseek_colors[["orange"]]) +
+  scale_y_continuous(labels = NULL) +
+  geom_text(nudge_y = 250, na.rm = TRUE, size = 4, fontface = "bold", color = heatseek_colors["orange"]) +
   theme_heatseek() +
-  theme(panel.grid.major.x = ggplot2::element_blank()) +
+  theme(
+    axis.text = element_text(size = 12, face = "bold"),
+    panel.grid = element_blank()
+  ) +
   labs(
     title = "Heat Complaints Resulting in HPD Violations",
     subtitle = "2017-2018 Heat Season",
     x = NULL, y = NULL,
-    caption = "Sources: NYC 311 Data"
+    caption = "Sources: NYC 311"
   )
 
-ggsave(here("img", "boro-complaints-violations_barchart.png"), p, width = 8, height = 4, units = "in")
+p %>% 
+  ggimage(width = 8, height = 4) %>% 
+  image_composite(heatseek_logo(), offset = "+1850+30") %>% 
+  image_write(here("img", "boro-complaints-violations_barchart.png"))
+
+knitr::include_graphics(here("img", "boro-complaints-violations_barchart.png"))
 ```
 
-``` r
-knitr::include_graphics("/img/boro-complaints-violations_barchart.png")
-```
-
-![](/img/boro-complaints-violations_barchart.png)<!-- -->
+![](/Users/maxwell/repos/heatseek-blogs/img/boro-complaints-violations_barchart.png)<!-- -->

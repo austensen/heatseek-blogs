@@ -58,7 +58,7 @@ p <- season_complaints %>%
     subtitle = "October 1 - May 31",
     x = NULL,
     y = NULL,
-    caption = "Source: NYC 311 Complaints"
+    caption = "Source: NYC 311"
   )
 
 p %>% 

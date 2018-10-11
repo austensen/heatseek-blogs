@@ -169,7 +169,7 @@ p <- complaints_clean %>%
     title = "Heat Complaints Resulting in HPD Violations",
     subtitle = "2017-2018 Heat Season",
     x = NULL, y = NULL,
-    caption = "Sources: NYC 311 Data"
+    caption = "Sources: NYC 311"
   )
 
 p %>% 

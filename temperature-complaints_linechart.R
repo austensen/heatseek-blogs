@@ -124,7 +124,7 @@ p <- ggplot() +
     subtitle = str_glue("October 1, {start_yr} - May 31, {end_yr}"),
     x = NULL,
     y = "Temperature (°F)",
-    caption = "Sources: DarkSky, NYC 311 Complaints"
+    caption = "Sources: DarkSky, NYC 311"
   )
 
 
