@@ -36,8 +36,13 @@ cd_shapes <- "https://data.cityofnewyork.us/api/geospatial/yfnk-k7r4?method=expo
   read_sf() %>% 
   select(cd = boro_cd)
 
+# City Council Districts
+ccd_shapes <- "https://data.cityofnewyork.us/api/geospatial/yusd-j4xi?method=export&format=GeoJSON" %>% 
+  read_sf() %>% 
+  select(ccd = coun_dist)
+
 # Tracts
-tract_shapes <- "https://data.cityofnewyork.us/api/geospatial/fxpq-c8ku?method=export&format=GeoJSON" %>% 
+tract2010_shapes <- "https://data.cityofnewyork.us/api/geospatial/fxpq-c8ku?method=export&format=GeoJSON" %>% 
   read_sf() %>% 
   transmute(tract2010 = str_c("36", boro_to_fips(boro_code), ct2010))
 
@@ -47,7 +52,7 @@ zip_dir <- tempdir()
 download.file(zip_url, path(zip_dir, "zipcodes.zip"))
 unzip(path(zip_dir, "zipcodes.zip"), exdir = zip_dir)
 
-zip_shapes <- path(zip_dir, "ZIP_CODE_040114.shp") %>% 
+zipcode_shapes <- path(zip_dir, "ZIP_CODE_040114.shp") %>% 
   read_sf(crs = 2263) %>% 
   select(zipcode = ZIPCODE) %>% 
   st_transform(4326)
@@ -55,13 +60,25 @@ zip_shapes <- path(zip_dir, "ZIP_CODE_040114.shp") %>%
 
 # Get Residential Units, Heat Complaints & Heat Violations by BBL ---------
 
+# Get BBLs registered with HPD, because when creating violation rates we don't
+# want to include non-rental units in the denoinator. So we'll add a flag to the
+# data that indicates whether the BBL is registered with HPD so we can create
+# serparte counts of units and violations just for these buildings
+hpd_registered_bbls <- tbl(con, "hpd_registrations") %>% 
+  distinct(bbl) %>% 
+  mutate(is_hpd_reg = TRUE)
+
 # Use nyc-db to get bbls, other geographies, and residential units from Pluto
 pluto_bbls <- tbl(con, "pluto_18v1") %>% 
   filter(unitsres > 0) %>% 
+  # Keep only BBLs registered with HPD
+  left_join(hpd_registered_bbls, by = "bbl") %>% 
   transmute(
     bbl,
+    is_hpd_reg,
     boro = borocode,
     cd = as.character(cd), 
+    ccd = as.character(council),
     zipcode,
     tract2010,
     unitsres,
@@ -69,6 +86,7 @@ pluto_bbls <- tbl(con, "pluto_18v1") %>%
     lat
   ) %>% 
   collect() %>% 
+  replace_na(list(is_hpd_reg = FALSE)) %>% 
   mutate(tract2010 = str_c("36", boro_to_fips(boro), str_pad(tract2010, 6, "right", "0")))
 
 # Use nyc-db to get count of heat violations by bbl
@@ -94,56 +112,37 @@ all_bbls <- pluto_bbls %>%
   left_join(violation_bbls, by = "bbl") %>% 
   left_join(complaint_bbls, by = "bbl") %>% 
   replace_na(list(viol = 0, comp = 0)) %>% 
-  mutate_at(vars(viol, comp), funs("rt" = . / unitsres))
+  mutate_at(vars(viol, comp), funs("rt" = . / unitsres)) %>% 
+  # Create these HPD-registered-only columns now for easier aggregation below
+  mutate_at(vars(matches("(comp)|(viol)|(unitsres)")), funs("reg" = . * is_hpd_reg))
 
 
 # Export GeoJSON Data for Maps --------------------------------------------
 
-# Aggregate data (if necessary), join with (or create) geometries, and export
-
-# BBL
+# All BBLs with any complaints or violations
 all_bbls %>% 
   filter_at(vars(lng, lat), any_vars(!is.na(.))) %>% 
   filter_at(vars(viol, comp), any_vars(. > 0)) %>% 
   st_as_sf(coords = c("lng", "lat"), crs = 4326) %>% 
-  select(bbl, unitsres, comp, comp_rt, viol, viol_rt) %>% 
+  select(bbl, is_hpd_reg, unitsres, comp, comp_rt, viol, viol_rt) %>% 
   write_sf(here("data", "bbl-complaints-violations_2017-2018.geojson"), delete_dsn = TRUE)
 
-# Boroughs
-all_bbls %>% 
-  group_by(boro) %>% 
-  summarise_at(vars(viol, comp, unitsres), sum) %>% 
-  mutate_at(vars(viol, comp), funs("rt" = . / unitsres)) %>% 
-  right_join(boro_shapes, by = "boro") %>% 
-  st_as_sf() %>% 
-  write_sf(here("data", "boro-complaints-violations_2017-2018.geojson"), delete_dsn = TRUE)
+# Aggregate by given geography and export a geojson file with counts of
+# residential units, complaints, violations, and rates for all residential BBLs
+# and just those registered with HPD
+summarise_and_export_geojson <- function(geo, shapes) {
+  all_bbls %>% 
+    select(-contains("_rt")) %>% 
+    group_by(!!sym(geo)) %>% 
+    summarise_at(vars(matches("^(comp)|(viol)|(unitsres)")), sum) %>% 
+    mutate_at(vars(viol, comp), funs("rt" = . / unitsres)) %>% 
+    mutate_at(vars(viol_reg, comp_reg), funs("rt" = . / unitsres_reg)) %>% 
+    right_join(shapes, by = geo) %>%
+    st_as_sf() %>%
+    write_sf(here("data", str_glue("{geo}-complaints-violations_2017-2018.geojson")), delete_dsn = TRUE)
+}
 
-# CDs
-all_bbls %>% 
-  group_by(cd) %>% 
-  summarise_at(vars(viol, comp, unitsres), sum) %>% 
-  mutate_at(vars(viol, comp), funs("rt" = . / unitsres)) %>% 
-  right_join(cd_shapes, by = "cd") %>% 
-  replace_na(list(viol = 0, comp = 0, viol_rt = 0, comp_rt = 0, unitsres = 0)) %>% 
-  st_as_sf() %>% 
-  write_sf(here("data", "cd-complaints-violations_2017-2018.geojson"), delete_dsn = TRUE)
+geos <- c("boro", "cd", "ccd", "tract2010", "zipcode")
+shapes <- list(boro_shapes, cd_shapes, ccd_shapes, tract2010_shapes, zipcode_shapes)
 
-# Tracts
-all_bbls %>% 
-  group_by(tract2010) %>% 
-  summarise_at(vars(viol, comp, unitsres), sum) %>% 
-  mutate_at(vars(viol, comp), funs("rt" = . / unitsres)) %>% 
-  right_join(tract_shapes, by = "tract2010") %>% 
-  replace_na(list(viol = 0, comp = 0, viol_rt = 0, comp_rt = 0, unitsres = 0)) %>% 
-  st_as_sf() %>% 
-  write_sf(here("data", "tract-complaints-violations_2017-2018.geojson"), delete_dsn = TRUE)
-
-# Zip Codes
-all_bbls %>% 
-  group_by(zipcode) %>% 
-  summarise_at(vars(viol, comp, unitsres), sum) %>% 
-  mutate_at(vars(viol, comp), funs("rt" = . / unitsres)) %>% 
-  right_join(zip_shapes, by = "zipcode") %>% 
-  replace_na(list(viol = 0, comp = 0, viol_rt = 0, comp_rt = 0, unitsres = 0)) %>% 
-  st_as_sf() %>% 
-  write_sf(here("data", "zip-complaints-violations_2017-2018.geojson"), delete_dsn = TRUE)
+walk2(geos, shapes, summarise_and_export_geojson)
