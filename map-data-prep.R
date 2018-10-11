@@ -137,6 +137,7 @@ summarise_and_export_geojson <- function(geo, shapes) {
     summarise_at(vars(matches("^(comp)|(viol)|(unitsres)")), sum) %>% 
     mutate_at(vars(viol, comp), funs("rt" = . / unitsres)) %>% 
     mutate_at(vars(viol_reg, comp_reg), funs("rt" = . / unitsres_reg)) %>% 
+    select(!!sym(geo), starts_with("unitsres"), starts_with("comp"), starts_with("viol")) %>% 
     right_join(shapes, by = geo) %>%
     st_as_sf() %>%
     write_sf(here("data", str_glue("{geo}-complaints-violations_2017-2018.geojson")), delete_dsn = TRUE)
