@@ -1,0 +1,26 @@
+column,type,description
+boro,character,"NYC borough code (1=MN, 2=BX, 3=BK, 4=QN, 5=SI)"
+cd,character,"Community districts number (boro(1), cd(2))"
+ccd,character,City council district number
+zipcode,character,Zip Code
+tract2010,character,"Census Tract (2010) FIPS code (state(2), county(3), tract(6))"
+unitsres,integer,Number of residential units
+unitsres_bbls,integer,BBLs with residential units
+unitsres_reg,integer,Number of residential units in BBLs registered with HPD
+unitsres_bbls_reg,integer,BBLs with residential units registered with HPD
+comp,integer,Number of heat complaints
+comp_bbls,integer,Number of BBLs with heat complaints
+comp_reg,integer,Number of heat complaints in BBLs registered with HPD
+comp_bbls_reg,integer,Number of BBLs registered with HPD with heat complaints
+comp_rt,numeric,Number of heat complaints per residential unit
+comp_reg_rt,numeric,Number of heat complaints per residential unit in BBLs registered with HPD
+comp_bbls_rt,numeric,Share of all BBLs with residential units that had at least one heat complaint
+comp_bbls_reg_rt,numeric,Share of all BBLs registered with HPD that had at least one heat complaint
+viol,integer,Number of heat violations
+viol_bbls,integer,Number of BBLs with heat violations
+viol_reg,integer,Number of heat violations in BBLs registered with HPD
+viol_bbls_reg,integer,Number of BBLs registered with HPD with heat violations
+viol_rt,numeric,Number of heat violations per residential unit
+viol_reg_rt,numeric,Number of heat violations per residential unit in BBLs registered with HPD
+viol_bbls_rt,numeric,Share of all BBLs with residential units that had at least one heat violation
+viol_bbls_reg_rt,numeric,Share of all BBLs registered with HPD that had at least one heat violation

@@ -1,0 +1,8 @@
+column,type,description
+bbl,character,"Unique tax lot ID (boro(1), block(5), lot(4)) (1=MN, 2=BX, 3=BK, 4=QN, 5=SI)"
+is_hpd_reg,boolean,BBL is registered with HPD
+unitsres,integer,Number of residential units in BBL
+comp,integer,Number of heat complaints
+comp_rt,numeric,Number of heat complaints per residential unit
+viol,integer,Number of heat violations
+viol_rt,numeric,Number of heat violations per residential unit
