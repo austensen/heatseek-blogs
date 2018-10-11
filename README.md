@@ -19,6 +19,14 @@ Edit [`sample_config.R`](sample_config.R) to add you connection info for [nyc-db
 
 ---
 
+### Data
+
+<br>
+
+All of the [`data`](data) created for this analysis are available for download, along with [`data dictionaries`](data/data-dictionaries). Included in the folder are a collection of geojson files with heat complaints, heat violations, residential units, and properties aggregated to a varity of geographic levels.
+
+---
+
 ### Results
 
 <br>
@@ -33,12 +41,12 @@ Edit [`sample_config.R`](sample_config.R) to add you connection info for [nyc-db
 
 ---
 
-#### [`boro-complaints-violations_barchart.R`](boro-complaints-violations_barchart.R)
+#### [`heat-complaints-stats.Rmd`](heat-complaints-stats.md)
 ![](img/boro-complaints-violations_barchart.png)
 
 ---
 
-#### [`heat-complaints-stats.Rmd`](heat-complaints-stats.Rmd)
+#### [`heat-complaints-buildings_map.R`](heat-complaints-buildings_map.R)
 ![](img/heat-complaints-buildings_map.png)
 
 ---
