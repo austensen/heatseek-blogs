@@ -92,8 +92,9 @@ pluto_bbls <- tbl(con, "pluto_18v1") %>%
 # Use nyc-db to get count of heat violations by bbl
 violation_bbls <- tbl(con, "hpd_violations") %>% 
   filter(
-    sql("bbl ~ '[1-5]\\d{9}'"),
+    sql("bbl ~ '[1-5]\\d{9}'"), # valid BBLs
     sql("novdescription ~ '27-20(2[8-9]|3[0-3])'"), # heat violations
+    sql("novissueddate between '2017-10-01' and '2018-05-31'") # 2017-2018 heat season
   ) %>% 
   group_by(bbl) %>% 
   summarise(viol = n()) %>% 
@@ -101,7 +102,7 @@ violation_bbls <- tbl(con, "hpd_violations") %>%
   mutate(viol = as.integer(viol))
 
 
-# Get count of heat complaints by bbl from 311 data
+# Get count of heat complaints by bbl from 311 data for 2017-2018 heat season
 complaint_bbls <- get_311_heat_complaints(2017, here("data")) %>% 
   filter(str_detect(bbl, "[1-5]\\d{9}")) %>% 
   group_by(bbl) %>% 
