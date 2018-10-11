@@ -114,6 +114,7 @@ all_bbls <- pluto_bbls %>%
   replace_na(list(viol = 0, comp = 0)) %>% 
   mutate_at(vars(viol, comp), funs("rt" = . / unitsres)) %>% 
   # Create these HPD-registered-only columns now for easier aggregation below
+  mutate_at(vars(viol, comp, unitsres), funs("bbls" = . > 0)) %>% 
   mutate_at(vars(matches("(comp)|(viol)|(unitsres)")), funs("reg" = . * is_hpd_reg))
 
 
@@ -137,6 +138,8 @@ summarise_and_export_geojson <- function(geo, shapes) {
     summarise_at(vars(matches("^(comp)|(viol)|(unitsres)")), sum) %>% 
     mutate_at(vars(viol, comp), funs("rt" = . / unitsres)) %>% 
     mutate_at(vars(viol_reg, comp_reg), funs("rt" = . / unitsres_reg)) %>% 
+    mutate_at(vars(viol_bbls, comp_bbls), funs("rt" = . / unitsres_bbls)) %>% 
+    mutate_at(vars(viol_bbls_reg, comp_bbls_reg), funs("rt" = . / unitsres_bbls_reg)) %>% 
     select(!!sym(geo), starts_with("unitsres"), starts_with("comp"), starts_with("viol")) %>% 
     right_join(shapes, by = geo) %>%
     st_as_sf() %>%
@@ -147,3 +150,4 @@ geos <- c("boro", "cd", "ccd", "tract2010", "zipcode")
 shapes <- list(boro_shapes, cd_shapes, ccd_shapes, tract2010_shapes, zipcode_shapes)
 
 walk2(geos, shapes, summarise_and_export_geojson)
+
