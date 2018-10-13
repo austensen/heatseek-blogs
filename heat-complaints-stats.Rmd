@@ -34,8 +34,8 @@ Many complaints are marked only as duplicates, and so here I assign these compla
 
 ```{r clean-complaints, cache=TRUE}
 complaints_clean <- complaints_raw %>% 
-  filter( # 671 records dropped
-    str_detect(bbl, "[1-5]\\d{9}"),
+  filter( # 684 records dropped
+    str_detect(bbl, "^[1-5](?!0{5})\\d{5}(?!0{4})\\d{4}$"),
     !is.na(resolution_description)
   ) %>% 
   left_join(res_desc_lookup, by = "resolution_description") %>% 
@@ -64,7 +64,7 @@ con <- connect_nyc_db()
 # Use nyc-db to get count of heat violations by bbl
 violations <- tbl(con, "hpd_violations") %>% 
   filter(
-    sql("bbl ~ '[1-5]\\d{9}'"), # valid BBLs
+    sql("bbl ~ '^[1-5](?!0{5})\\d{5}(?!0{4})\\d{4}$'"), # valid BBLs
     sql("novdescription ~ '27-20(2[8-9]|3[0-3])'"), # heat violations
     sql("novissueddate between '2017-10-01' and '2018-05-31'") # 2017-2018 heat season
   ) %>% 

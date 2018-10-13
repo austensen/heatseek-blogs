@@ -1,7 +1,7 @@
 Heat Complaints - 2017-2018
 ================
 Maxwell Austensen
-2018-10-11
+2018-10-12
 
 ``` r
 library(tidyverse) # tibble, dplyr, tidyr, readr, purrr, stringr, ggplot2
@@ -36,8 +36,8 @@ violations” category for the stats below.
 
 ``` r
 complaints_clean <- complaints_raw %>% 
-  filter( # 671 records dropped
-    str_detect(bbl, "[1-5]\\d{9}"),
+  filter( # 684 records dropped
+    str_detect(bbl, "^[1-5](?!0{5})\\d{5}(?!0{4})\\d{4}$"),
     !is.na(resolution_description)
   ) %>% 
   left_join(res_desc_lookup, by = "resolution_description") %>% 
@@ -66,7 +66,7 @@ con <- connect_nyc_db()
 # Use nyc-db to get count of heat violations by bbl
 violations <- tbl(con, "hpd_violations") %>% 
   filter(
-    sql("bbl ~ '[1-5]\\d{9}'"), # valid BBLs
+    sql("bbl ~ '^[1-5](?!0{5})\\d{5}(?!0{4})\\d{4}$'"), # valid BBLs
     sql("novdescription ~ '27-20(2[8-9]|3[0-3])'"), # heat violations
     sql("novissueddate between '2017-10-01' and '2018-05-31'") # 2017-2018 heat season
   ) %>% 
@@ -76,9 +76,9 @@ violations <- tbl(con, "hpd_violations") %>%
 
 -----
 
-Total heat complaints: **216,601**
+Total heat complaints: **216,588**
 
-BBLs with heat complaints: **32,170**
+BBLs with heat complaints: **32,168**
 
 <br>
 
@@ -101,10 +101,10 @@ Heat complaints in BBLs with heat violations issued this season:
 **88,117**
 
 Heat complaints in BBLs with no heat violations issued this season:
-**128,484**
+**128,471**
 
 BBLs with heat complaints but no heat violations issued this season:
-**25,773**
+**25,771**
 
 -----
 

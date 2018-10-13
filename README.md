@@ -48,5 +48,3 @@ All of the [`data`](data) created for this analysis are available for download, 
 
 #### [`heat-complaints-buildings_map.R`](heat-complaints-buildings_map.R)
 ![](img/heat-complaints-buildings_map.png)
-
----
